@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI as a Psychologist? — тренажёр слов</title>
+<style>
+:root{
+  --bg:#f6f3ec; --card:#fffdf8; --ink:#25302c; --muted:#6b7570;
+  --sage:#5f8a72; --sage-d:#3f6b55; --sage-l:#e6efe7; --line:#e1ddd2;
+  --blue:#4b6f9e; --blue-l:#e8eef7; --ok:#2f8a5b; --ok-l:#e3f4ea; --bad:#c2524f; --bad-l:#fbe7e5;
+  --gold:#c99a3a;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+h1,h2,.serif{font-family:Georgia,"Times New Roman",serif}
+header.hero{background:linear-gradient(160deg,#e9f0e6 0%,#f6f3ec 70%);padding:28px 18px 18px;text-align:center;border-bottom:1px solid var(--line)}
+.hero h1{font-size:30px;line-height:1.15;margin:6px 0 4px;color:#1f2f3f}
+.hero .sub{color:var(--muted);font-size:15px}
+.tag{display:inline-block;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--sage-d);background:var(--sage-l);border-radius:99px;padding:4px 12px}
+.sticky{position:sticky;top:0;z-index:20;background:rgba(246,243,236,.96);backdrop-filter:blur(6px);border-bottom:1px solid var(--line);padding:8px 14px}
+.sticky .row{max-width:720px;margin:auto;display:flex;align-items:center;gap:10px;font-size:14px}
+.pbar{flex:1;height:8px;background:#e4e0d4;border-radius:9px;overflow:hidden}
+.pbar>div{height:100%;width:0;background:linear-gradient(90deg,var(--sage),var(--gold));transition:width .3s}
+.score{font-weight:700;white-space:nowrap}
+.toc{max-width:720px;margin:14px auto 0;padding:0 14px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.toc::-webkit-scrollbar{display:none}
+.toc a{flex:0 0 auto;font-size:13px;text-decoration:none;color:var(--sage-d);background:#fff;border:1px solid var(--line);border-radius:99px;padding:6px 12px}
+main{max-width:720px;margin:auto;padding:14px 12px 80px}
+section.ex{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px 16px;margin:18px 0;box-shadow:0 6px 18px rgba(60,50,30,.05);scroll-margin-top:56px}
+.ex h2{font-size:22px;margin:0 0 2px;color:#1f2f3f;display:flex;gap:10px;align-items:baseline}
+.ex h2 .n{flex:0 0 auto;width:30px;height:30px;border-radius:50%;background:var(--sage);color:#fff;font:700 15px/30px -apple-system,Arial,sans-serif;text-align:center;transform:translateY(-3px)}
+.instr{color:var(--muted);font-size:15px;margin:2px 0 12px}
+.exscore{font-size:13px;color:var(--sage-d);font-weight:600}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:12px;padding:10px 14px;touch-action:manipulation}
+button:active{transform:scale(.98)}
+button.pri{background:var(--sage);border-color:var(--sage);color:#fff;font-weight:600}
+button.ghost{background:transparent}
+button.sm{font-size:14px;padding:7px 11px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.chips button{font-size:13px;padding:6px 11px;border-radius:99px}
+.chips button.on{background:var(--sage-d);color:#fff;border-color:var(--sage-d)}
+/* flashcards */
+.fc-wrap{perspective:1200px}
+.fc{position:relative;height:340px;cursor:pointer;transform-style:preserve-3d;transition:transform .5s}
+.fc.flip{transform:rotateY(180deg)}
+.fc .face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;border:2px solid #cfe0d2;overflow:auto}
+.fc .front{background:linear-gradient(170deg,#fff 0%,#eef5ee 100%)}
+.fc .back{background:linear-gradient(170deg,#fff 0%,#eef2f9 100%);border-color:#cdd9ec;transform:rotateY(180deg)}
+.fc .en{font-family:Georgia,serif;font-size:30px;font-weight:700;color:#1f2f3f;line-height:1.2}
+.fc .ipa{color:var(--blue);margin-top:8px;font-size:17px}
+.fc .ru{font-size:24px;font-weight:650;color:#1f2f3f}
+.fc .exen{margin-top:14px;font-style:italic;font-size:16px}
+.fc .exru{color:var(--muted);font-size:14px;margin-top:4px}
+.fc .note{margin-top:10px;font-size:13px;background:#fff6dd;border-radius:10px;padding:5px 10px;color:#7a5a10}
+.fc .hint{position:absolute;bottom:10px;font-size:12px;color:#9aa39e}
+.fc-nav{display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:8px}
+.fc-nav .count{font-size:14px;color:var(--muted)}
+.say{border:none;background:var(--blue-l);color:var(--blue);border-radius:99px;padding:6px 12px;font-size:15px}
+.knowbar{display:flex;gap:8px;margin-top:10px}
+.knowbar button{flex:1}
+.k-yes{border-color:#bfe2cd;color:var(--ok)} .k-no{border-color:#f0c9c7;color:var(--bad)}
+/* question list */
+.q{border-top:1px dashed var(--line);padding:12px 0}
+.q:first-of-type{border-top:none}
+.q .qn{font-size:12px;color:#9aa39e}
+.q .prompt{font-size:17px;margin:2px 0 8px}
+.q .prompt b{font-family:Georgia,serif;font-size:19px}
+.q .hint{font-size:13px;color:var(--muted)}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.opts.one{grid-template-columns:1fr}
+.opts button{text-align:left;min-height:46px}
+.opts button.ok,.tok.ok{background:var(--ok-l);border-color:var(--ok);color:#1e5e3d;font-weight:600}
+.opts button.bad{background:var(--bad-l);border-color:var(--bad);color:#8a2d2a}
+.opts button:disabled{cursor:default}
+.gap{display:inline-block;min-width:70px;border-bottom:2px solid var(--sage);text-align:center;font-weight:700;color:var(--sage-d)}
+.fb{font-size:14px;margin-top:6px;border-radius:10px;padding:7px 10px}
+.fb.ok{background:var(--ok-l);color:#1e5e3d}.fb.bad{background:var(--bad-l);color:#8a2d2a}
+input[type=text],textarea{width:100%;font:inherit;font-size:17px;padding:11px 12px;border:1px solid #cfcabd;border-radius:12px;background:#fff;color:var(--ink)}
+textarea{min-height:76px;resize:vertical}
+input.ok,textarea.ok{border-color:var(--ok);background:var(--ok-l)} input.bad,textarea.bad{border-color:var(--bad);background:var(--bad-l)}
+.inrow{display:flex;gap:8px;align-items:center}
+.inrow input{flex:1}
+/* match */
+.match{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.match .col{display:flex;flex-direction:column;gap:8px}
+.match button{min-height:54px;font-size:15px;line-height:1.25;text-align:center}
+.match button.sel{border-color:var(--blue);background:var(--blue-l)}
+.match button.done{background:var(--ok-l);border-color:var(--ok);color:#1e5e3d;opacity:.75}
+.match button.wrong{background:var(--bad-l);border-color:var(--bad)}
+/* word order */
+.built{min-height:52px;border:2px dashed #cfcabd;border-radius:12px;padding:6px;display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.pool{display:flex;flex-wrap:wrap;gap:6px}
+.tok{padding:7px 11px;border-radius:10px;font-size:16px;background:#f3f6f2}
+.built .tok{background:var(--blue-l);border-color:#cdd9ec}
+.final{text-align:center}
+.final .big{font-size:44px;font-family:Georgia,serif;color:var(--sage-d);font-weight:700}
+footer{text-align:center;color:#9aa39e;font-size:12px;padding:20px}
+@media (min-width:600px){.hero h1{font-size:38px}.fc{height:320px}}
+@media (max-width:380px){.opts{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <span class="tag">Irina · B1/B1+</span>
+  <h1>AI as a Psychologist?</h1>
+  <div class="sub">Тренажёр слов урока: 20 фраз с карточек + 30 слов, которые мы записали на уроке.<br>Листай вниз и делай упражнения по порядку 👇</div>
+</header>
+
+<div class="sticky"><div class="row">
+  <span>Прогресс</span><div class="pbar"><div id="pfill"></div></div><span class="score" id="pscore">0 / 0</span>
+</div></div>
+
+<nav class="toc" id="toc"></nav>
+
+<main id="main"></main>
+
+<footer>© Чемоданчик учителя английского, 2026</footer>
+
+<script>
+/* ============ DATA ============ */
+const W = [
+// --- Set A: phrases from the lesson cards ---
+{en:"feel overwhelmed",ipa:"/fiːl ˌəʊvəˈwelmd/",ru:"чувствовать, что всё навалилось",ex:"I have three deadlines this week, and I feel overwhelmed.",exRu:"На этой неделе у меня три дедлайна, и я чувствую, что всё навалилось.",set:"A"},
+{en:"open up",ipa:"/ˈəʊpən ʌp/",ru:"открыться, рассказать о своих чувствах",ex:"It took her a long time to open up to her new friend.",exRu:"Ей понадобилось много времени, чтобы открыться новой подруге.",set:"A"},
+{en:"bottle up feelings",ipa:"/ˈbɒtl ʌp ˈfiːlɪŋz/",ru:"держать чувства в себе",ex:"Don't bottle up your feelings — talk to someone.",exRu:"Не держи чувства в себе — поговори с кем-нибудь.",set:"A",ans:["bottle up feelings","bottle up your feelings","bottle up my feelings"]},
+{en:"vent",ipa:"/vent/",ru:"выговориться",ex:"I don't need advice, I just want to vent.",exRu:"Мне не нужен совет, я просто хочу выговориться.",set:"A",ans:["vent","to vent"]},
+{en:"seek reassurance",ipa:"/siːk ˌriːəˈʃʊərəns/",ru:"искать подтверждения, что всё в порядке",ex:"Before exams she often calls her mum to seek reassurance.",exRu:"Перед экзаменами она часто звонит маме, чтобы услышать, что всё будет хорошо.",set:"A"},
+{en:"feel judged",ipa:"/fiːl dʒʌdʒd/",ru:"чувствовать, что тебя осуждают",ex:"Some people talk to a chatbot because they don't feel judged.",exRu:"Некоторые говорят с чат-ботом, потому что не чувствуют осуждения.",set:"A"},
+{en:"cope with stress",ipa:"/kəʊp wɪð stres/",ru:"справляться со стрессом",ex:"Sport helps me cope with stress.",exRu:"Спорт помогает мне справляться со стрессом.",set:"A"},
+{en:"emotional support",ipa:"/ɪˈməʊʃənl səˈpɔːt/",ru:"эмоциональная поддержка",ex:"Close friends give us emotional support when life is hard.",exRu:"Близкие друзья дают нам эмоциональную поддержку, когда жизнь трудна.",set:"A"},
+{en:"empathy",ipa:"/ˈempəθi/",ru:"эмпатия, сопереживание",ex:"A good psychologist listens with empathy.",exRu:"Хороший психолог слушает с сопереживанием.",set:"A"},
+{en:"a coping strategy",ipa:"/ə ˈkəʊpɪŋ ˈstrætədʒi/",ru:"способ справляться с трудностями",ex:"Going for a walk is my favourite coping strategy.",exRu:"Прогулка — мой любимый способ справляться с трудностями.",set:"A"},
+{en:"a chatbot",ipa:"/ə ˈtʃætbɒt/",ru:"чат-бот",ex:"I asked a chatbot for advice about my project.",exRu:"Я спросила у чат-бота совета по моему проекту.",set:"A"},
+{en:"a prompt",ipa:"/ə prɒmpt/",ru:"запрос к ИИ",ex:"Write a clear prompt if you want a useful answer.",exRu:"Напиши понятный запрос, если хочешь полезный ответ.",set:"A"},
+{en:"a follow-up question",ipa:"/ə ˈfɒləʊ ʌp ˈkwestʃən/",ru:"уточняющий вопрос",ex:"A good friend asks a follow-up question before giving advice.",exRu:"Хороший друг задаёт уточняющий вопрос, прежде чем дать совет.",set:"A",ans:["a follow-up question","follow-up question","a follow up question","follow up question"]},
+{en:"reliable",ipa:"/rɪˈlaɪəbl/",ru:"надёжный, достоверный",ex:"Is information from AI always reliable?",exRu:"Информация от ИИ всегда достоверна?",set:"A"},
+{en:"misleading",ipa:"/ˌmɪsˈliːdɪŋ/",ru:"вводящий в заблуждение",ex:"The answer sounded confident, but it was misleading.",exRu:"Ответ звучал уверенно, но вводил в заблуждение.",set:"A"},
+{en:"privacy",ipa:"/ˈprɪvəsi/",ru:"конфиденциальность, личное пространство",ex:"Think about your privacy before you share personal details.",exRu:"Подумай о конфиденциальности, прежде чем делиться личными данными.",set:"A"},
+{en:"set boundaries",ipa:"/set ˈbaʊndriz/",ru:"устанавливать границы",ex:"It's important to set boundaries with your phone at night.",exRu:"Важно установить границы с телефоном по вечерам.",set:"A"},
+{en:"rely on",ipa:"/rɪˈlaɪ ɒn/",ru:"полагаться на",ex:"You can't rely on a chatbot for every decision.",exRu:"Нельзя полагаться на чат-бот в каждом решении.",set:"A"},
+{en:"challenge an assumption",ipa:"/ˈtʃælɪndʒ ən əˈsʌmpʃn/",ru:"поставить под сомнение предположение",ex:"Challenge your assumption: maybe she is just busy.",exRu:"Поставь под сомнение своё предположение: может, она просто занята.",set:"A",ans:["challenge an assumption","challenge the assumption","challenge my assumption","challenge your assumption"]},
+{en:"seek professional help",ipa:"/siːk prəˈfeʃənl help/",ru:"обратиться за помощью к специалисту",ex:"If you feel bad for weeks, seek professional help.",exRu:"Если тебе плохо несколько недель, обратись к специалисту.",set:"A"},
+// --- Set B: words from our lesson notes ---
+{en:"follow your aim / goal",ipa:"/ˈfɒləʊ jɔːr eɪm / ɡəʊl/",ru:"идти к своей цели",ex:"Don't give up — follow your goal!",exRu:"Не сдавайся — иди к своей цели!",set:"B",ans:["follow your aim","follow your goal","follow your aim / goal","follow your aim goal","follow your aim or goal"]},
+{en:"to support",ipa:"/tə səˈpɔːt/",ru:"поддерживать",ex:"My family always supports me.",exRu:"Моя семья всегда меня поддерживает.",set:"B",ans:["support","to support"]},
+{en:"polite",ipa:"/pəˈlaɪt/",ru:"вежливый",ex:"The chatbot's answers are always polite.",exRu:"Ответы чат-бота всегда вежливые.",set:"B"},
+{en:"avoid + -ing",ipa:"/əˈvɔɪd/",ru:"избегать (делать что-то)",ex:"I avoid talking about my problems.",exRu:"Я избегаю разговоров о своих проблемах.",set:"B",note:"После avoid — глагол с -ing: avoid talking, avoid eating",ans:["avoid","to avoid","avoid + -ing","avoid ing","avoid doing"]},
+{en:"avoid smoking",ipa:"/əˈvɔɪd ˈsməʊkɪŋ/",ru:"избегать курения, не курить",ex:"Doctors tell us to avoid smoking.",exRu:"Врачи советуют нам не курить.",set:"B"},
+{en:"in order to",ipa:"/ɪn ˈɔːdə tuː/",ru:"для того чтобы",ex:"I use AI in order to save time.",exRu:"Я пользуюсь ИИ, чтобы сэкономить время.",set:"B"},
+{en:"solve a problem",ipa:"/sɒlv ə ˈprɒbləm/",ru:"решить проблему",ex:"Talking to a friend can help you solve a problem.",exRu:"Разговор с другом может помочь решить проблему.",set:"B",ans:["solve a problem","solve the problem","to solve a problem"]},
+{en:"decide",ipa:"/dɪˈsaɪd/",ru:"решать, принимать решение (глагол)",ex:"I can't decide what to do.",exRu:"Не могу решить, что делать.",set:"B",ans:["decide","to decide"]},
+{en:"decision",ipa:"/dɪˈsɪʒn/",ru:"решение (существительное)",ex:"It was a difficult decision.",exRu:"Это было трудное решение.",set:"B",note:"make a decision — принять решение",ans:["decision","a decision"]},
+{en:"earn money",ipa:"/ɜːn ˈmʌni/",ru:"зарабатывать деньги",ex:"He works in a café at weekends to earn money.",exRu:"Он работает в кафе по выходным, чтобы заработать.",set:"B",ans:["earn money","to earn money"]},
+{en:"enter university",ipa:"/ˈentər ˌjuːnɪˈvɜːsəti/",ru:"поступить в университет",ex:"My son entered university last year.",exRu:"Мой сын поступил в университет в прошлом году.",set:"B",ans:["enter university","enter the university","enter uni","enter the uni","to enter university"]},
+{en:"entrance",ipa:"/ˈentrəns/",ru:"вход; поступление",ex:"Meet me at the main entrance.",exRu:"Встретимся у главного входа.",set:"B",note:"entrance exams — вступительные экзамены",ans:["entrance","an entrance","the entrance"]},
+{en:"exit",ipa:"/ˈeksɪt/",ru:"выход",ex:"Where is the exit?",exRu:"Где выход?",set:"B",ans:["exit","an exit","the exit"]},
+{en:"pass the exams",ipa:"/pɑːs ði ɪɡˈzæmz/",ru:"сдать экзамены",ex:"She studied hard and passed the exams.",exRu:"Она усердно занималась и сдала экзамены.",set:"B",ans:["pass the exams","pass exams","pass the exam","to pass the exams"]},
+{en:"action",ipa:"/ˈækʃn/",ru:"действие",ex:"Don't just talk — take action!",exRu:"Хватит говорить — действуй!",set:"B",ans:["action","an action"]},
+{en:"artificial intelligence",ipa:"/ˌɑːtɪˈfɪʃl ɪnˈtelɪdʒəns/",ru:"искусственный интеллект",ex:"Artificial intelligence can write texts and answer questions.",exRu:"Искусственный интеллект умеет писать тексты и отвечать на вопросы.",set:"B",ans:["artificial intelligence","ai"]},
+{en:"artificial leather",ipa:"/ˌɑːtɪˈfɪʃl ˈleðə/",ru:"искусственная кожа",ex:"This bag is made of artificial leather.",exRu:"Эта сумка из искусственной кожи.",set:"B"},
+{en:"skin",ipa:"/skɪn/",ru:"кожа (человека)",ex:"Use sun cream to protect your skin.",exRu:"Пользуйся солнцезащитным кремом, чтобы защитить кожу.",set:"B",note:"skin — кожа человека, leather — кожа как материал"},
+{en:"genuine leather",ipa:"/ˈdʒenjuɪn ˈleðə/",ru:"натуральная кожа",ex:"These shoes are expensive because they're genuine leather.",exRu:"Эти туфли дорогие, потому что из натуральной кожи.",set:"B"},
+{en:"to close",ipa:"/tə kləʊz/",ru:"закрывать",ex:"Please close the window.",exRu:"Пожалуйста, закрой окно.",set:"B",note:"глагол close — со звуком [z]",ans:["close","to close"]},
+{en:"close friend",ipa:"/kləʊs frend/",ru:"близкий друг",ex:"My close friend always supports me.",exRu:"Мой близкий друг всегда меня поддерживает.",set:"B",note:"прилагательное close — со звуком [s]",ans:["close friend","a close friend"]},
+{en:"close relative",ipa:"/kləʊs ˈrelətɪv/",ru:"близкий родственник",ex:"Only close relatives came to the wedding.",exRu:"На свадьбу пришли только близкие родственники.",set:"B",ans:["close relative","a close relative"]},
+{en:"stranger",ipa:"/ˈstreɪndʒə/",ru:"незнакомец",ex:"Don't share personal information with strangers.",exRu:"Не делись личной информацией с незнакомцами.",set:"B",ans:["stranger","a stranger"]},
+{en:"strange",ipa:"/streɪndʒ/",ru:"странный",ex:"I had a strange dream last night.",exRu:"Мне приснился странный сон этой ночью.",set:"B"},
+{en:"lonely",ipa:"/ˈləʊnli/",ru:"одинокий (грустно, без общения)",ex:"A lonely old man sat on the bench.",exRu:"На скамейке сидел одинокий старик.",set:"B"},
+{en:"feel lonely",ipa:"/fiːl ˈləʊnli/",ru:"чувствовать себя одиноко",ex:"He often feels lonely in the new city.",exRu:"В новом городе он часто чувствует себя одиноко.",set:"B"},
+{en:"live alone",ipa:"/lɪv əˈləʊn/",ru:"жить одному",ex:"My grandmother lives alone.",exRu:"Моя бабушка живёт одна.",set:"B",note:"alone — один (без других людей), не обязательно грустно"},
+{en:"home alone",ipa:"/həʊm əˈləʊn/",ru:"один дома",ex:"The children were home alone for an hour.",exRu:"Дети были дома одни целый час.",set:"B"},
+{en:"from time to time",ipa:"/frəm taɪm tə taɪm/",ru:"время от времени",ex:"I visit my aunt from time to time.",exRu:"Я время от времени навещаю тётю.",set:"B"},
+{en:"it is necessary",ipa:"/ɪt ɪz ˈnesəsəri/",ru:"необходимо, нужно",ex:"It is necessary to check the facts.",exRu:"Необходимо проверять факты.",set:"B",ans:["it is necessary","it's necessary","necessary"]}
+];
+W.forEach((w,i)=>{w.id=i; if(!w.ans) w.ans=[w.en];});
+
+/* ============ HELPERS ============ */
+const $=(s,r=document)=>r.querySelector(s);
+const el=(tag,attrs={},...kids)=>{const e=document.createElement(tag);for(const k in attrs){if(k==='class')e.className=attrs[k];else if(k==='html')e.innerHTML=attrs[k];else if(k.startsWith('on'))e.addEventListener(k.slice(2),attrs[k]);else e.setAttribute(k,attrs[k]);}kids.flat().forEach(c=>{if(c==null)return;e.append(c.nodeType?c:document.createTextNode(c))});return e;};
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a;};
+const sample=(a,n)=>shuffle(a).slice(0,n);
+const CONTR=[[/\bdon't\b/g,"do not"],[/\bdoesn't\b/g,"does not"],[/\bdidn't\b/g,"did not"],[/\bcan't\b/g,"cannot"],[/\bcan not\b/g,"cannot"],[/\bwon't\b/g,"will not"],[/\bit's\b/g,"it is"],[/\bi'm\b/g,"i am"],[/\bshe's\b/g,"she is"],[/\bhe's\b/g,"he is"],[/\bisn't\b/g,"is not"],[/\baren't\b/g,"are not"],[/\bi've\b/g,"i have"],[/\bthey're\b/g,"they are"],[/\bwe're\b/g,"we are"],[/\byou're\b/g,"you are"]];
+function norm(s){s=(s||"").toLowerCase().replace(/[’‘`]/g,"'").replace(/[.,!?;:"«»()—–]/g," ").replace(/-/g," ").replace(/\s+/g," ").trim();CONTR.forEach(([r,t])=>s=s.replace(r,t));return s;}
+const match=(input,answers)=>answers.some(a=>norm(a)===norm(input));
+
+/* speech */
+let VOICE=null;
+function pickVoice(){const vs=speechSynthesis.getVoices();VOICE=vs.find(v=>/en-GB/i.test(v.lang)&&/female|Kate|Serena|Martha|Google UK English Female/i.test(v.name))||vs.find(v=>/en-GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function say(text,slow){if(!('speechSynthesis' in window)){alert('Озвучка не поддерживается в этом браузере');return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text.replace(/\s*\/\s*/g,", ").replace("+ -ing","doing"));u.lang=VOICE?VOICE.lang:'en-GB';if(VOICE)u.voice=VOICE;u.rate=slow?0.6:0.9;speechSynthesis.speak(u);}
+const sayBtn=(text,label="🔊")=>el('button',{class:'say',type:'button',onclick:e=>{e.stopPropagation();say(text)}},label);
+
+/* global score */
+const SCORE={tasks:new Map()};
+function regTask(key){if(!SCORE.tasks.has(key))SCORE.tasks.set(key,null);updScore();}
+function unregPrefix(p){for(const k of [...SCORE.tasks.keys()])if(k.startsWith(p))SCORE.tasks.delete(k);updScore();}
+function setTask(key,ok){if(SCORE.tasks.get(key)===null){SCORE.tasks.set(key,!!ok);updScore();}}
+function updScore(){let tot=0,done=0,ok=0;SCORE.tasks.forEach(v=>{tot++;if(v!==null){done++;if(v)ok++;}});$('#pscore').textContent=ok+' / '+tot;$('#pfill').style.width=(tot?done/tot*100:0)+'%';document.querySelectorAll('[data-exscore]').forEach(s=>{const p=s.dataset.exscore;let t=0,o=0,d=0;SCORE.tasks.forEach((v,k)=>{if(k.startsWith(p+':')){t++;if(v!==null)d++;if(v)o++;}});s.textContent=t?`✔ ${o} из ${t}`+(d===t?' — готово!':''):'';});const f=$('#finalBox');if(f)renderFinal();}
+
+/* section builder */
+let N=0;const TOC=[];
+function section(id,title,instr,builder,opts={}){N++;const sec=el('section',{class:'ex',id:id});const body=el('div');
+  const h=el('h2',{},el('span',{class:'n'},String(N)),el('span',{},title));
+  sec.append(h,el('div',{class:'instr',html:instr}),el('div',{class:'exscore','data-exscore':id}),body);
+  const build=()=>{unregPrefix(id+':');body.innerHTML='';builder(body,id);};
+  build();
+  if(!opts.noRedo)sec.append(el('div',{class:'btns'},el('button',{class:'sm ghost',type:'button',onclick:build},'🔄 Новый набор / заново')));
+  $('#main').append(sec);TOC.push([id,title]);}
+
+/* multiple choice list */
+function mcList(body,id,items){ // items: {prompt(html|node), options[], answer, after?}
+  items.forEach((it,i)=>{const key=id+':'+i;regTask(key);
+    const q=el('div',{class:'q'});q.append(el('div',{class:'qn'},(i+1)+'.'));
+    const p=el('div',{class:'prompt'});if(typeof it.prompt==='string')p.innerHTML=it.prompt;else p.append(it.prompt);q.append(p);
+    const opts=el('div',{class:'opts'+(it.one?' one':'')});const fb=el('div');
+    shuffle(it.options).forEach(o=>{const b=el('button',{type:'button'},o);b.onclick=()=>{
+      const right=o===it.answer;setTask(key,right);
+      if(right){opts.querySelectorAll('button').forEach(x=>{x.disabled=true;if(x.textContent===it.answer)x.classList.add('ok');});if(it.after){fb.className='fb ok';fb.innerHTML=it.after;}if(it.onRight)it.onRight(p);}
+      else{b.classList.add('bad');b.disabled=true;}
+    };opts.append(b);});
+    q.append(opts,fb);body.append(q);});
+}
+/* typing list */
+function typeList(body,id,items){ // items: {prompt html, answers[], hint, model, audio?}
+  items.forEach((it,i)=>{const key=id+':'+i;regTask(key);
+    const q=el('div',{class:'q'});q.append(el('div',{class:'qn'},(i+1)+'.'));
+    const p=el('div',{class:'prompt',html:it.prompt});if(it.audio){p.prepend(sayBtn(it.audio,'🔊 Слушать'),' ');p.append(' ',el('button',{class:'say',type:'button',onclick:()=>say(it.audio,true)},'🐢'));}
+    q.append(p);
+    const inp=el('input',{type:'text',autocapitalize:'off',autocomplete:'off',autocorrect:'off',spellcheck:'false',placeholder:'Напиши по-английски'});
+    const fb=el('div');let tries=0;
+    const check=()=>{if(!inp.value.trim())return;tries++;
+      if(match(inp.value,it.answers)){inp.className='ok';inp.disabled=true;setTask(key,tries===1);fb.className='fb ok';fb.innerHTML='Верно! '+(it.model?'<b>'+it.model+'</b>':'');btn.disabled=true;if(it.say)say(it.say);}
+      else{inp.className='bad';fb.className='fb bad';fb.textContent='Пока не так. Попробуй ещё или возьми подсказку.';}};
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter')check();});
+    const btn=el('button',{class:'pri',type:'button',onclick:check},'OK');
+    let h=0;const hint=el('button',{class:'sm',type:'button',onclick:()=>{const a=it.answers[0];h=Math.min(a.length,h+2);fb.className='fb';fb.style.background='#fff6dd';fb.textContent='Подсказка: '+a.slice(0,h)+'…';}},'💡 Подсказка');
+    const show=el('button',{class:'sm',type:'button',onclick:()=>{setTask(key,false);fb.className='fb bad';fb.innerHTML='Ответ: <b>'+(it.model||it.answers[0])+'</b> — перепиши его, чтобы запомнить.';}},'👀 Ответ');
+    q.append(el('div',{class:'inrow'},inp,btn),el('div',{class:'btns'},hint,show),fb);body.append(q);});
+}
+const opt4=(w,field,pool=W)=>{const others=sample(pool.filter(x=>x.id!==w.id&&x[field]!==w[field]),3).map(x=>x[field]);return [w[field],...others];};
+
+/* ============ 1. FLASHCARDS ============ */
+section('cards','Карточки','Нажми на карточку — она перевернётся и покажет перевод и пример. 🔊 — послушать, 🐢 — медленно. Отмечай «Знаю» / «Ещё учу».',(body)=>{
+  let filter='all',deck=[],i=0;let known={};try{known=JSON.parse(localStorage.getItem('irina-ai-known')||'{}')}catch(e){}
+  const saveK=()=>{try{localStorage.setItem('irina-ai-known',JSON.stringify(known))}catch(e){}};
+  const chips=el('div',{class:'chips'});
+  const F=[['all','Все 50'],['A','Фразы с карточек (20)'],['B','Слова урока (30)'],['learn','Ещё учу']];
+  F.forEach(([k,t])=>{chips.append(el('button',{type:'button','data-k':k,onclick:()=>{filter=k;make();}},t));});
+  const fc=el('div',{class:'fc'});const wrap=el('div',{class:'fc-wrap'},fc);
+  const count=el('span',{class:'count'});const kcount=el('div',{class:'hint',style:'font-size:13px;color:var(--muted);margin-top:6px'});
+  const make=(shuf)=>{chips.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===filter));
+    deck=W.filter(w=>filter==='all'||w.set===filter||(filter==='learn'&&!known[w.en]));if(shuf)deck=shuffle(deck);i=0;show();};
+  const show=()=>{fc.classList.remove('flip');const k=Object.values(known).filter(Boolean).length;kcount.textContent='Знаю: '+k+' из '+W.length;
+    if(!deck.length){fc.innerHTML='<div class="face front"><div class="ru">Все слова выучены! 🎉</div></div>';count.textContent='0 / 0';return;}
+    const w=deck[i];count.textContent=(i+1)+' / '+deck.length+(known[w.en]?' · ✓ знаю':'');
+    fc.innerHTML='';
+    const front=el('div',{class:'face front'},el('div',{class:'en'},w.en),el('div',{class:'ipa'},w.ipa),el('div',{style:'margin-top:12px;display:flex;gap:8px'},sayBtn(w.en),el('button',{class:'say',type:'button',onclick:e=>{e.stopPropagation();say(w.en,true)}},'🐢')),el('div',{class:'hint'},'нажми, чтобы перевернуть'));
+    const back=el('div',{class:'face back'},el('div',{class:'ru'},w.ru),el('div',{class:'exen'},w.ex,' ',sayBtn(w.ex)),el('div',{class:'exru'},w.exRu),w.note?el('div',{class:'note'},'💡 '+w.note):null);
+    fc.append(front,back);if(window.__fcReady)say(w.en);};
+  fc.onclick=()=>fc.classList.toggle('flip');
+  const nav=el('div',{class:'fc-nav'},el('button',{type:'button',onclick:()=>{if(!deck.length)return;i=(i-1+deck.length)%deck.length;show();}},'◀'),count,el('button',{type:'button',onclick:()=>{if(!deck.length)return;i=(i+1)%deck.length;show();}},'▶'));
+  const kb=el('div',{class:'knowbar'},el('button',{class:'k-no',type:'button',onclick:()=>{if(!deck.length)return;known[deck[i].en]=false;saveK();i=(i+1)%deck.length;show();}},'Ещё учу'),el('button',{class:'k-yes',type:'button',onclick:()=>{if(!deck.length)return;known[deck[i].en]=true;saveK();if(filter==='learn'){deck.splice(i,1);if(i>=deck.length)i=0;}else i=(i+1)%deck.length;show();}},'✓ Знаю'));
+  body.append(chips,wrap,nav,kb,el('div',{class:'btns'},el('button',{class:'sm',type:'button',onclick:()=>make(true)},'🔀 Перемешать')),kcount);
+  // build without autoplay on load
+  chips.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.k===filter));deck=W.slice();
+  show();window.__fcReady=true;
+},{noRedo:true});
+
+/* ============ 2. LISTEN & CHOOSE ============ */
+section('listen','Послушай и выбери','Нажми 🔊, послушай и выбери, что прозвучало.',(body,id)=>{
+  mcList(body,id,sample(W,10).map(w=>{const d=el('div');d.append(sayBtn(w.en,'🔊 Слушать'),' ',el('button',{class:'say',type:'button',onclick:()=>say(w.en,true)},'🐢 медленно'));
+    return {prompt:d,options:opt4(w,'en'),answer:w.en,after:'= '+w.ru};}));
+});
+
+/* ============ 3. MATCH ============ */
+section('match','Соедини пары','Нажми на английскую фразу, потом на её перевод. Раунд из 6 пар.',(body,id)=>{
+  const deck=shuffle(W);const rounds=[];for(let r=0;r<deck.length;r+=6)rounds.push(deck.slice(r,r+6));
+  let ri=0;const box=el('div');const info=el('div',{class:'instr'});body.append(info,box);
+  rounds.forEach((r,k)=>r.forEach(w=>regTask(id+':'+k+':'+w.id)));
+  const play=()=>{box.innerHTML='';const round=rounds[ri];info.textContent='Раунд '+(ri+1)+' из '+rounds.length;
+    let sel=null,left=round.length;const L=el('div',{class:'col'}),R=el('div',{class:'col'});
+    const miss=new Set();
+    shuffle(round).forEach(w=>{const b=el('button',{type:'button'},w.en);b.dataset.id=w.id;b.onclick=()=>{if(b.classList.contains('done'))return;L.querySelectorAll('button').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');sel=b;say(w.en);};L.append(b);});
+    shuffle(round).forEach(w=>{const b=el('button',{type:'button'},w.ru);b.dataset.id=w.id;b.onclick=()=>{if(!sel||b.classList.contains('done'))return;
+      if(sel.dataset.id===b.dataset.id){sel.classList.remove('sel');sel.classList.add('done');b.classList.add('done');setTask(id+':'+ri+':'+w.id,!miss.has(w.id));sel=null;left--;
+        if(!left){box.append(el('div',{class:'btns'},ri<rounds.length-1?el('button',{class:'pri',type:'button',onclick:()=>{ri++;play();}},'Следующий раунд ▶'):el('div',{class:'fb ok'},'Все пары найдены! 🎉')));}}
+      else{miss.add(Number(sel.dataset.id));b.classList.add('wrong');setTimeout(()=>b.classList.remove('wrong'),500);}};R.append(b);});
+    box.append(el('div',{class:'match'},L,R));};
+  play();
+});
+
+/* ============ 4. EN -> RU ============ */
+section('enru','Что это значит?','Выбери правильный перевод.',(body,id)=>{
+  mcList(body,id,sample(W,12).map(w=>({prompt:'<b>'+w.en+'</b>',options:opt4(w,'ru'),answer:w.ru,one:true,onRight:()=>say(w.en)})));
+});
+
+/* ============ 5. RU -> EN ============ */
+section('ruen','Как сказать по-английски?','Выбери английский вариант.',(body,id)=>{
+  mcList(body,id,sample(W,12).map(w=>({prompt:'<b>'+w.ru+'</b>',options:opt4(w,'en'),answer:w.en,onRight:()=>say(w.en)})));
+});
+
+/* ============ 6. TRUE / FALSE ============ */
+section('tf','Верно или нет?','Правильно ли переведена фраза?',(body,id)=>{
+  mcList(body,id,sample(W,12).map((w,i)=>{const right=Math.random()<.5;const ru=right?w.ru:sample(W.filter(x=>x.id!==w.id),1)[0].ru;
+    return {prompt:'<b>'+w.en+'</b> = '+ru,options:['✔ Верно','✘ Неверно'],answer:right?'✔ Верно':'✘ Неверно',after:right?'Да!':'Правильно: '+w.en+' = '+w.ru};}));
+});
+
+/* ============ 7. COLLOCATIONS ============ */
+const COLL=[
+ ["open ___","up",["up","on","in"],"открыться"],["bottle ___ your feelings","up",["up","down","out"],"держать чувства в себе"],
+ ["seek ___","reassurance",["reassurance","privacy","exit"],"искать подтверждения, что всё хорошо"],["cope ___ stress","with",["with","on","at"],"справляться со стрессом"],
+ ["rely ___","on",["on","in","at"],"полагаться на"],["set ___","boundaries",["boundaries","problems","exams"],"устанавливать границы"],
+ ["challenge an ___","assumption",["assumption","entrance","action"],"поставить под сомнение предположение"],["feel ___","judged",["judged","reliable","genuine"],"чувствовать, что тебя осуждают"],
+ ["emotional ___","support",["support","leather","exit"],"эмоциональная поддержка"],["a coping ___","strategy",["strategy","prompt","skin"],"способ справляться с трудностями"],
+ ["a follow-up ___","question",["question","decision","relative"],"уточняющий вопрос"],["seek professional ___","help",["help","money","skin"],"обратиться к специалисту"],
+ ["earn ___","money",["money","exams","problem"],"зарабатывать деньги"],["solve a ___","problem",["problem","decision","stranger"],"решить проблему"],
+ ["pass the ___","exams",["exams","money","boundaries"],"сдать экзамены"],["enter ___","university",["university","exams","skin"],"поступить в университет"],
+ ["make a ___","decision",["decision","decide","action"],"принять решение"],["genuine ___","leather",["leather","skin","friend"],"натуральная кожа"],
+ ["artificial ___","intelligence",["intelligence","relative","exit"],"искусственный интеллект"],["close ___","relative",["relative","stranger","entrance"],"близкий родственник"],
+ ["live ___","alone",["alone","lonely","strange"],"жить одному"],["from time ___ time","to",["to","by","for"],"время от времени"],
+ ["feel ___","lonely",["lonely","alone","overwhelm"],"чувствовать себя одиноко"],["avoid ___","smoking",["smoking","smoke","to smoke"],"не курить"],
+ ["follow your ___","goal",["goal","exit","skin"],"идти к своей цели"]
+];
+section('coll','Закончи фразу','Выбери слово, которое пропущено. Подсказка — перевод под фразой.',(body,id)=>{
+  mcList(body,id,sample(COLL,14).map(([ph,a,opts,ru])=>({prompt:'<b>'+ph.replace('___','<span class="gap">?</span>')+'</b><div class="hint">'+ru+'</div>',options:opts,answer:a,after:'✔ '+ph.replace('___',a),onRight:()=>say(ph.replace('___',a))})));
+});
+
+/* ============ 8. GAP FILL A ============ */
+const GAPA=[
+ ["After a long day at work, Emma felt ___ and couldn't think clearly.","overwhelmed",["overwhelmed","reliable","polite","genuine"]],
+ ["It isn't healthy to ___ your feelings for months.","bottle up",["bottle up","open up","earn","exit"]],
+ ["I don't need advice — I just want to ___ .","vent",["vent","decide","rely","close"]],
+ ["She finally ___ to her sister and told her everything.","opened up",["opened up","bottled up","passed","avoided"]],
+ ["Some people talk to a chatbot because they don't feel ___ .","judged",["judged","reliable","misleading","genuine"]],
+ ["Yoga helps me ___ stress.","cope with",["cope with","rely on","set","earn"]],
+ ["Going for a walk is a simple coping ___ .","strategy",["strategy","prompt","decision","entrance"]],
+ ["Write a clear ___ if you want a useful answer from AI.","prompt",["prompt","skin","stranger","exit"]],
+ ["Before giving advice, a good friend asks a ___ question.","follow-up",["follow-up","lonely","leather","overwhelmed"]],
+ ["Information from the internet isn't always ___ — check the facts.","reliable",["reliable","lonely","alone","overwhelmed"]],
+ ["The answer sounded confident, but in fact it was ___ .","misleading",["misleading","reliable","polite","necessary"]],
+ ["Don't share your passwords — think about your ___ .","privacy",["privacy","empathy","action","entrance"]],
+ ["You shouldn't ___ a chatbot for every important decision.","rely on",["rely on","cope with","vent","earn"]],
+ ["If you feel sad for weeks, it's better to seek professional ___ .","help",["help","privacy","leather","exit"]],
+ ["A good psychologist listens with ___ and doesn't judge.","empathy",["empathy","privacy","skin","exit"]],
+ ["Challenge your ___ : maybe Maya is just busy.","assumption",["assumption","strategy","entrance","leather"]],
+ ["I set ___ : no phone after 10 p.m.","boundaries",["boundaries","decisions","relatives","exams"]],
+ ["When she is nervous, she calls her mum to seek ___ .","reassurance",["reassurance","privacy","action","skin"]],
+ ["Friends and family give us emotional ___ .","support",["support","exit","prompt","leather"]],
+ ["I asked a ___ to help me write an email.","chatbot",["chatbot","stranger","relative","entrance"]]
+];
+section('gapA','Вставь слово: чувства и ИИ','Выбери слово, которое подходит в предложение (фразы с карточек).',(body,id)=>{
+  mcList(body,id,sample(GAPA,12).map(([s,a,o])=>({prompt:s.replace('___','<span class="gap">?</span>'),options:o,answer:a,onRight:(p)=>{p.innerHTML=s.replace('___','<b style="color:var(--ok)">'+a+'</b>');say(s.replace('___',a));}})));
+});
+
+/* ============ 9. GAP FILL B ============ */
+const GAPB=[
+ ["My parents always ___ me when I have problems.","support",["support","avoid","decide","earn"]],
+ ["The receptionist was very ___ and helpful.","polite",["polite","lonely","strange","artificial"]],
+ ["Try to avoid ___ junk food late at night.","eating",["eating","to eat","eat","ate"]],
+ ["Doctors tell us to avoid ___ .","smoking",["smoking","to smoke","smoke","smoked"]],
+ ["I use AI in order ___ save time.","to",["to","for","that","of"]],
+ ["Talking to a friend can help you ___ a problem.","solve",["solve","pass","earn","enter"]],
+ ["I can't ___ which course to choose.","decide",["decide","decision","solve","support"]],
+ ["It was a hard ___ , but I'm happy with it.","decision",["decision","decide","action","entrance"]],
+ ["He works in a café at weekends to ___ money.","earn",["earn","win","pass","enter"]],
+ ["My daughter wants to ___ university next year.","enter",["enter","pass","exit","earn"]],
+ ["Please use the main ___ to come into the building.","entrance",["entrance","exit","action","skin"]],
+ ["In case of fire, go to the nearest ___ .","exit",["exit","entrance","stranger","decision"]],
+ ["She studied hard and ___ all her exams.","passed",["passed","entered","earned","decided"]],
+ ["Don't just talk — take ___ !","action",["action","decide","exit","skin"]],
+ ["___ intelligence can write texts and answer questions.","Artificial",["Artificial","Genuine","Lonely","Polite"]],
+ ["This bag is cheap because it's ___ leather.","artificial",["artificial","genuine","close","lonely"]],
+ ["These shoes are expensive — they're made of ___ leather.","genuine",["genuine","artificial","strange","polite"]],
+ ["Use sun cream to protect your ___ .","skin",["skin","leather","privacy","exit"]],
+ ["Please ___ the door — it's cold.","close",["close","enter","exit","decide"]],
+ ["My mum is my ___ friend — I tell her everything.","close",["close","strange","lonely","polite"]],
+ ["Children shouldn't get into a car with a ___ .","stranger",["stranger","strange","relative","exit"]],
+ ["What a ___ dream I had last night!","strange",["strange","stranger","lonely","reliable"]],
+ ["Since he moved to a new city, he often feels ___ .","lonely",["lonely","polite","genuine","reliable"]],
+ ["My grandmother has lived ___ since 2015.","alone",["alone","lonely","close","strange"]],
+ ["Kevin's parents went out, so he was home ___ .","alone",["alone","lonely","close","strange"]],
+ ["I visit my aunt from time ___ time.","to",["to","for","by","in"]],
+ ["It is ___ to sleep at least seven hours.","necessary",["necessary","polite","lonely","genuine"]],
+ ["Don't give up — follow your ___ !","goal",["goal","exit","skin","decide"]],
+ ["Only close ___ came to the wedding.","relatives",["relatives","strangers","exits","skins"]]
+];
+section('gapB','Вставь слово: слова урока','Выбери слово, которое подходит в предложение (слова, которые мы записали).',(body,id)=>{
+  mcList(body,id,sample(GAPB,14).map(([s,a,o])=>({prompt:s.replace('___','<span class="gap">?</span>'),options:o,answer:a,onRight:(p)=>{p.innerHTML=s.replace('___','<b style="color:var(--ok)">'+a+'</b>');say(s.replace('___',a));}})));
+});
+
+/* ============ 10. CONFUSING PAIRS ============ */
+const CONF=[
+ ["A ___ asked me how to get to the station.","stranger","strange","незнакомец — stranger, странный — strange"],
+ ["This soup tastes ___ . What's in it?","strange","stranger","странный — strange"],
+ ["A ___ old woman sat alone on the bench.","lonely","alone","перед существительным — только lonely"],
+ ["I like living ___ — I have my own space.","alone","lonely","alone — один, без других людей (не грустно)"],
+ ["We need to make a ___ today.","decision","decide","make a decision — существительное"],
+ ["We must ___ today.","decide","decision","must + глагол → decide"],
+ ["Show your ticket at the ___ .","entrance","exit","вход — entrance"],
+ ["You can leave through the ___ on the left.","exit","entrance","выход — exit"],
+ ["Is this website ___ ? Can I trust it?","reliable","misleading","надёжный — reliable"],
+ ["The headline was ___ — the story was different.","misleading","reliable","вводящий в заблуждение — misleading"],
+ ["Leather is made from animal ___ .","skin","leather","кожа животного/человека — skin"],
+ ["This jacket is real, ___ leather.","genuine","artificial","настоящая кожа — genuine leather"],
+ ["She doesn't share her problems — she ___ everything up.","bottles","opens","держать в себе — bottle up"],
+ ["He finally ___ up and told me the truth.","opened","bottled","открыться — open up"],
+ ["A psychologist should show ___ .","empathy","privacy","сопереживание — empathy"],
+ ["My diary is private. Please respect my ___ .","privacy","empathy","личное пространство — privacy"]
+];
+section('conf','Не перепутай!','Похожие слова — выбери правильное. После ответа появится объяснение.',(body,id)=>{
+  mcList(body,id,shuffle(CONF).slice(0,12).map(([s,a,b,why])=>({prompt:s.replace('___','<span class="gap">?</span>'),options:[a,b],answer:a,after:'💡 '+why,onRight:(p)=>{p.innerHTML=s.replace('___','<b style="color:var(--ok)">'+a+'</b>');}})));
+});
+
+/* ============ 11. CLOSE [s] / [z] ============ */
+const CLOSE=[["Please close the door.","[z] — закрывать"],["She is my close friend.","[s] — близкий"],["The shop closes at eight.","[z] — закрывать"],["Only close relatives came.","[s] — близкий"],["Close your eyes and relax.","[z] — закрывать"],["We live close to the park.","[s] — близко"],["Don't close the window!","[z] — закрывать"],["They are very close.","[s] — близкие"]];
+section('close','close: [z] или [s]?','Глагол <b>close</b> (закрывать) читается с [z] /kləʊz/, прилагательное <b>close</b> (близкий) — с [s] /kləʊs/. Как читается close в предложении? Послушай после ответа.',(body,id)=>{
+  mcList(body,id,shuffle(CLOSE).map(([s,a])=>({prompt:s.replace(/(close[s]?)/i,'<b>$1</b>'),options:['[z] — закрывать','[s] — близкий'].map(x=>a.startsWith(x.slice(0,3))?a:x),answer:a,onRight:()=>say(s)})));
+});
+
+/* ============ 12. GRAMMAR ============ */
+const GRAM=[
+ ["I avoid ___ about my problems.","talking",["talking","to talk"]],["She avoided ___ the question.","answering",["answering","to answer"]],
+ ["Try to avoid ___ too much coffee.","drinking",["drinking","to drink"]],["You should avoid ___ late.","going to bed",["going to bed","to go to bed"]],
+ ["I went to the library in order ___ .","to study",["to study","studying"]],["He works hard in order ___ money.","to earn",["to earn","earning"]],
+ ["In order ___ the exams, you need to practise.","to pass",["to pass","passing"]],["I've decided ___ a psychologist.","to see",["to see","seeing"]],
+ ["She decided ___ the job.","to take",["to take","taking"]],["It is necessary ___ the facts.","to check",["to check","checking"]],
+ ["Many people use chatbots in order ___ time.","to save",["to save","saving"]],["Avoid ___ personal information with strangers.","sharing",["sharing","to share"]]
+];
+section('gram','Грамматика: avoid + -ing / in order to','<b>avoid + глагол-ing</b> (avoid talking) · <b>in order to + глагол</b> (in order to save) · <b>decide to + глагол</b> · <b>it is necessary to + глагол</b>.',(body,id)=>{
+  mcList(body,id,shuffle(GRAM).map(([s,a,o])=>({prompt:s.replace('___','<span class="gap">?</span>'),options:o,answer:a,onRight:(p)=>{p.innerHTML=s.replace('___','<b style="color:var(--ok)">'+a+'</b>');say(s.replace('___',a));}})));
+});
+
+/* ============ 13. TYPE THE ENGLISH ============ */
+section('type','Напиши по-английски','Прочитай перевод и напиши английское слово или фразу. Нажми OK или Enter. Если трудно — 💡.',(body,id)=>{
+  typeList(body,id,sample(W.filter(w=>w.en!=="avoid + -ing"),12).map(w=>({prompt:'<b>'+w.ru+'</b>',answers:w.ans,model:w.en,say:w.en})));
+});
+
+/* ============ 14. DICTATION ============ */
+section('dict','Диктант','Послушай и напиши, что услышала. 🐢 — медленнее.',(body,id)=>{
+  typeList(body,id,sample(W.filter(w=>!/\/|\+/.test(w.en)),10).map(w=>({prompt:'',audio:w.en,answers:w.ans,model:w.en+' — '+w.ru})));
+});
+
+/* ============ 15. WORD ORDER ============ */
+const ORDER=["Don't bottle up your feelings.","I just want to vent.","Sport helps me cope with stress.","You can't rely on a chatbot for everything.","It is necessary to check the facts.","She works at weekends in order to earn money.","My grandmother lives alone.","I visit my close relatives from time to time.","A good friend asks a follow-up question.","He wants to enter university next year.","I avoid talking about my problems.","Sometimes I feel lonely and overwhelmed."];
+section('order','Собери предложение','Нажимай на слова по порядку. Нажми на слово в строке, чтобы убрать его.',(body,id)=>{
+  sample(ORDER,8).forEach((s,i)=>{const key=id+':'+i;regTask(key);const words=s.replace(/[.!?]$/,'').split(' ');const end=s.slice(-1);
+    const q=el('div',{class:'q'});q.append(el('div',{class:'qn'},(i+1)+'.'));
+    const built=el('div',{class:'built'}),pool=el('div',{class:'pool'}),fb=el('div');let tries=0;
+    const add=(b)=>{b.remove();built.append(b);b.onclick=()=>{b.remove();pool.append(b);b.onclick=()=>add(b);};};
+    shuffle(words).forEach(w=>{const b=el('button',{class:'tok',type:'button'},w);b.onclick=()=>add(b);pool.append(b);});
+    const chk=el('button',{class:'pri sm',type:'button',onclick:()=>{const got=[...built.children].map(b=>b.textContent).join(' ');if(!got)return;tries++;
+      if(norm(got)===norm(s)){setTask(key,tries===1);fb.className='fb ok';fb.textContent='✔ '+s;built.querySelectorAll('button').forEach(b=>{b.classList.add('ok');b.onclick=null});chk.disabled=true;say(s);}
+      else{fb.className='fb bad';fb.textContent='Порядок неверный — попробуй ещё.';}}},'Проверить');
+    const show=el('button',{class:'sm',type:'button',onclick:()=>{setTask(key,false);fb.className='fb bad';fb.textContent='Ответ: '+s;}},'👀 Ответ');
+    q.append(built,pool,el('div',{class:'btns'},chk,show),fb);body.append(q);});
+});
+
+/* ============ 16. TRANSLATE SENTENCES ============ */
+const TR=[
+ ["Мне не нужен совет, я просто хочу выговориться.",["I don't need advice, I just want to vent.","I don't need advice. I just want to vent.","I do not need any advice, I just want to vent.","I don't need any advice, I just want to vent."]],
+ ["Не держи чувства в себе.",["Don't bottle up your feelings.","Do not bottle up your feelings."]],
+ ["Я чувствую, что всё навалилось.",["I feel overwhelmed."]],
+ ["Нельзя полагаться на чат-бот во всём.",["You can't rely on a chatbot for everything.","You can't rely on a chatbot in everything.","You shouldn't rely on a chatbot for everything."]],
+ ["Время от времени я чувствую себя одиноко.",["From time to time I feel lonely.","I feel lonely from time to time."]],
+ ["Моя бабушка живёт одна.",["My grandmother lives alone.","My granny lives alone.","My grandma lives alone."]],
+ ["Он сдал экзамены и поступил в университет.",["He passed the exams and entered university.","He passed the exams and entered the university.","He passed his exams and entered university."]],
+ ["Мне нужно принять решение.",["I need to make a decision.","I have to make a decision."]],
+ ["Спорт помогает мне справляться со стрессом.",["Sport helps me cope with stress.","Sport helps me to cope with stress.","Sports help me cope with stress."]],
+ ["Эта сумка из натуральной кожи.",["This bag is made of genuine leather.","This bag is genuine leather.","This bag is made from genuine leather."]],
+ ["Мой близкий друг всегда меня поддерживает.",["My close friend always supports me."]],
+ ["Необходимо обратиться за помощью к специалисту.",["It is necessary to seek professional help.","It's necessary to seek professional help."]],
+ ["Я пользуюсь ИИ, чтобы сэкономить время.",["I use AI in order to save time.","I use AI to save time.","I use artificial intelligence in order to save time."]],
+ ["Избегай разговоров с незнакомцами в интернете.",["Avoid talking to strangers online.","Avoid talking to strangers on the internet.","Avoid talking with strangers online."]]
+];
+section('tr','Переведи предложение','Переведи на английский. Если ответ не совпал с образцом, сравни сама: если смысл тот же — нажми «Засчитать».',(body,id)=>{
+  sample(TR,8).forEach(([ru,ans],i)=>{const key=id+':'+i;regTask(key);const q=el('div',{class:'q'});q.append(el('div',{class:'qn'},(i+1)+'.'),el('div',{class:'prompt',html:'<b>'+ru+'</b>'}));
+    const ta=el('textarea',{autocapitalize:'sentences',spellcheck:'false',placeholder:'Your translation…'});const fb=el('div');const extra=el('div',{class:'btns'});
+    const chk=el('button',{class:'pri sm',type:'button',onclick:()=>{if(!ta.value.trim())return;extra.innerHTML='';
+      if(match(ta.value,ans)){ta.className='ok';setTask(key,true);fb.className='fb ok';fb.innerHTML='✔ Отлично! '+ans[0];say(ans[0]);}
+      else{ta.className='bad';fb.className='fb bad';fb.innerHTML='Образец: <b>'+ans[0]+'</b>';extra.append(el('button',{class:'sm',type:'button',onclick:()=>{setTask(key,true);ta.className='ok';fb.className='fb ok';fb.innerHTML='Засчитано ✔ Образец: '+ans[0];extra.innerHTML='';}},'✔ Засчитать — смысл тот же'),sayBtn(ans[0],'🔊 Образец'));}}},'Проверить');
+    q.append(ta,el('div',{class:'btns'},chk),fb,extra);body.append(q);});
+});
+
+/* ============ 17. SPEAK & WRITE ============ */
+const SPEAK=[
+ ["What do you usually do when you feel overwhelmed?","When I feel overwhelmed, I make a list and go for a walk. It's my favourite coping strategy."],
+ ["Who do you open up to when you have a problem?","I usually open up to my close friend. She always gives me emotional support."],
+ ["Do you ever bottle up your feelings? Why?","Sometimes I bottle up my feelings because I don't want to feel judged."],
+ ["Would you rely on a chatbot for advice? Why / why not?","From time to time I ask a chatbot, but I don't rely on it, because the answers can be misleading."],
+ ["When is it necessary to seek professional help?","It is necessary to seek professional help if you feel lonely or sad for a long time."],
+ ["How do you cope with stress before an important decision?","In order to cope with stress, I avoid thinking about it at night and talk to my family."]
+];
+section('speak','Скажи и напиши','Ответь на вопрос 2–3 предложениями, используя новые фразы. Можно сначала сказать вслух, потом написать. Потом посмотри пример.',(body,id)=>{
+  SPEAK.forEach(([qq,sampleA],i)=>{const q=el('div',{class:'q'});q.append(el('div',{class:'qn'},(i+1)+'.'),el('div',{class:'prompt'},el('b',{},qq),' ',sayBtn(qq)));
+    const ta=el('textarea',{placeholder:'Write your answer…',spellcheck:'true'});const fb=el('div');
+    q.append(ta,el('div',{class:'btns'},el('button',{class:'sm',type:'button',onclick:()=>{fb.className='fb ok';fb.innerHTML='Пример: <i>'+sampleA+'</i>';fb.append(' ',sayBtn(sampleA));}},'👀 Пример ответа')),fb);body.append(q);});
+},{noRedo:true});
+
+/* ============ FINAL ============ */
+function renderFinal(){let tot=0,ok=0,done=0;SCORE.tasks.forEach(v=>{tot++;if(v!==null)done++;if(v)ok++;});const pct=tot?Math.round(ok/tot*100):0;
+  const f=$('#finalBox');f.innerHTML='';f.append(el('div',{class:'big'},pct+'%'),el('div',{},'Правильно с первого раза: '+ok+' из '+tot+(done<tot?' (сделано '+done+')':'')),
+   el('div',{class:'instr',style:'margin-top:8px'},pct>=90?'Блестяще! Слова уже твои 🌟':pct>=70?'Очень хорошо! Повтори карточки «Ещё учу» 💪':'Хорошее начало! Пройди упражнения ещё раз — нажми «Новый набор» 🙂'));}
+(function(){N++;const sec=el('section',{class:'ex final',id:'final'},el('h2',{style:'justify-content:center'},'Итог'),el('div',{id:'finalBox'}),el('div',{class:'btns',style:'justify-content:center'},el('button',{class:'pri',type:'button',onclick:()=>{location.reload()}},'🔄 Пройти всё заново')));$('#main').append(sec);TOC.push(['final','Итог']);renderFinal();})();
+
+/* TOC */
+TOC.forEach(([id,t],i)=>$('#toc').append(el('a',{href:'#'+id},(i+1)+'. '+t)));
+updScore();
+</script>
+</body>
+</html>
